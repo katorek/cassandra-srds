@@ -20,3 +20,10 @@ cassandra:
   keyspaceName: reservation
   localDataCenterName: datacenter1
   dropSchema: false
+
+# ----------------------------------------------------------
+# Reservation config
+# ----------------------------------------------------------
+reservation:
+  startDate: 2020-01-01
+  endDate: 2020-05-01
