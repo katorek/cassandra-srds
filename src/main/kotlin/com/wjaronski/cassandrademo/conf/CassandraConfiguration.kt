@@ -50,7 +50,7 @@ class CassandraConfiguration {
                         tmpSession.execute(dropKeyspace(keyspace()).ifExists().build())
                         logger.debug("+ Keyspace '{}' has been dropped (if existed)", keyspace())
                     }
-                    tmpSession.execute(createKeyspace(keyspace()).ifNotExists().withSimpleStrategy(1).build())
+                    tmpSession.execute(createKeyspace(keyspace()).ifNotExists().withSimpleStrategy(3).build())
                     logger.debug("+ Keyspace '{}' has been created (if needed)", keyspace())
                 }
         return CqlSession.builder()

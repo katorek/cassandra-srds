@@ -19,7 +19,12 @@ cassandra:
   port: 9042
   keyspaceName: reservation
   localDataCenterName: datacenter1
-  dropSchema: false
+  dropSchema: true
+
+limits:
+  room:
+    min: 1
+    max: 5
 
 # ----------------------------------------------------------
 # Reservation config
