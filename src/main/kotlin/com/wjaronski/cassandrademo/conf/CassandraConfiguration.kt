@@ -7,46 +7,31 @@ import com.datastax.oss.driver.api.querybuilder.SchemaBuilder.createKeyspace
 import com.datastax.oss.driver.api.querybuilder.SchemaBuilder.dropKeyspace
 import com.wjaronski.cassandrademo.repository.ReservationRepository
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.net.InetSocketAddress
 
 
 @Configuration
-class CassandraConfiguration {
-    @Value("\${cassandra.contactPoint:127.0.0.1}")
-    protected var cassandraHost: String = "127.0.0.1"
-
-    @Value("\${cassandra.port:9042}")
-    protected var cassandraPort: Int = 9042
-
-    @Value("\${cassandra.localDataCenterName:datacenter1}")
-    protected var localDataCenterName: String = "datacenter1"
-
-    @Value("\${cassandra.keyspaceName:reservation}")
-    var keyspaceName: String = "reservation"
-
-    // Option to drop schema and generate table again at startup
-    @Value("\${cassandra.dropSchema:true}")
-    var dropSchema: Boolean = false
-
+class CassandraConfiguration(
+        val p: AppSettings
+) {
 
     private val logger = LoggerFactory.getLogger(ReservationRepository::class.java!!)
 
     @Bean
     fun keyspace(): CqlIdentifier {
-        return CqlIdentifier.fromCql(keyspaceName)
+        return CqlIdentifier.fromCql(p.cass.keyspaceName)
     }
 
     @Bean
     fun cqlSession(): CqlSession {
         logger.info("Creating Keyspace and expected table in Cassandra if not present.")
         CqlSession.builder()
-                .addContactPoint(InetSocketAddress(cassandraHost, cassandraPort))
-                .withLocalDatacenter(localDataCenterName)
+                .addContactPoint(InetSocketAddress(p.cass.contactPoint, p.cass.port))
+                .withLocalDatacenter(p.cass.localDataCenterName)
                 .build().use { tmpSession ->
-                    if (dropSchema) {
+                    if (p.cass.dropSchema) {
                         tmpSession.execute(dropKeyspace(keyspace()).ifExists().build())
                         logger.debug("+ Keyspace '{}' has been dropped (if existed)", keyspace())
                     }
@@ -54,9 +39,17 @@ class CassandraConfiguration {
                     logger.debug("+ Keyspace '{}' has been created (if needed)", keyspace())
                 }
         return CqlSession.builder()
-                .addContactPoint(InetSocketAddress(cassandraHost, cassandraPort))
+                .addContactPoint(InetSocketAddress(p.cass.contactPoint, p.cass.port))
                 .withKeyspace(keyspace())
-                .withLocalDatacenter(localDataCenterName)
+                .withLocalDatacenter(p.cass.localDataCenterName)
                 .build()
+    }
+
+    //    @PreDestroy
+    fun cleanupSession(cqlSession: CqlSession) {
+        if (!cqlSession.isClosed) {
+            cqlSession.close()
+            logger.info("+ CqlSession has been closed")
+        }
     }
 }

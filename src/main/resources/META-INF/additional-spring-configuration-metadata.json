@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "cassandra.contactPoint",
+      "type": "java.lang.String",
+      "description": "Description for cassandra.contactPoint."
+    },
+    {
+      "name": "properties.cas.contactPoint",
+      "type": "java.lang.String",
+      "description": "Description for properties.cas.contactPoint."
+    }
+  ]
+}

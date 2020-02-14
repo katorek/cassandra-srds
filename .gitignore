@@ -33,3 +33,5 @@ build/
 
 # Settings
 application.yml
+*-scp.cmd
+run.sh

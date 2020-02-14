@@ -1,34 +1,36 @@
 
-# ----------------------------------------------------------
-# Spring Boot Config
-# ----------------------------------------------------------
+
 spring:
   application:
     name: Reservation Reservicess
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
+  profiles:
+    active: dev
 server:
-  port: 8080
-
-# ----------------------------------------------------------
-# DataStax Enterprise Java Driver Config
-# ----------------------------------------------------------
-cassandra:
-  contactPoint: 10.0.0.1
-  port: 9042
-  keyspaceName: reservation
-  localDataCenterName: datacenter1
-  dropSchema: true
+  port: 8180
+logging:
+  level:
+    root: INFO
+    com.wjaronski.cassandrademo: DEBUG
+appsettings:
+  cass:
+    contactPoint: localhost
+    port: 9042
+    keyspaceName: reservation
+    localDataCenterName: datacenter1
+    dropSchema: true
+  room:
+    minSize: 1
+    maxSize: 4
+  initData: data.csv
 
 limits:
   room:
     min: 1
-    max: 5
+    max: 4
 
-# ----------------------------------------------------------
-# Reservation config
-# ----------------------------------------------------------
 reservation:
   startDate: 2020-01-01
   endDate: 2020-05-01

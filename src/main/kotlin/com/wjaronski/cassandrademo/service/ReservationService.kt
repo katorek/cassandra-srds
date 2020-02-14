@@ -1,9 +1,11 @@
 package com.wjaronski.cassandrademo.service
 
 import com.wjaronski.cassandrademo.conf.ReservationConfiguration
+import com.wjaronski.cassandrademo.model.dto.RoomAvailabilityDto
 import com.wjaronski.cassandrademo.repository.ReservationRepository
+import com.wjaronski.cassandrademo.repository.RoomRepository
 import org.springframework.stereotype.Service
-import java.time.LocalDate
+import java.util.*
 
 /**
  * Created by Wojciech Jaronski
@@ -11,12 +13,15 @@ import java.time.LocalDate
  */
 @Service
 class ReservationService(
-        var reservationRepository: ReservationRepository,
-        var reservationConfiguration: ReservationConfiguration
+        val roomRepository: RoomRepository,
+        val reservationRepository: ReservationRepository,
+        val reservationConfiguration: ReservationConfiguration
 ) {
 
 
-    fun availableRooms(sDate: LocalDate, eDate: LocalDate) {
-
+    fun availableRooms(dto: RoomAvailabilityDto): Optional<Set<Int>> {
+        return roomRepository.getRoomAvailability(dto)
     }
+
+//    fun insertRoomInfo(dto:)
 }
