@@ -1,5 +1,4 @@
 
-
 spring:
   application:
     name: Reservation Reservicess
@@ -7,7 +6,9 @@ spring:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
   profiles:
-    active: dev,init
+    active: devRestTest, initData
+#    initData - initialize base data ionto tables
+#   dev - create rest controller to manual testing
 server:
   port: 8180
 logging:
@@ -20,7 +21,8 @@ appsettings:
     port: 9042
     keyspaceName: reservation
     localDataCenterName: datacenter1
-    dropSchema: true
+    dropSchema: false
+    tables: truncate
   room:
     minSize: 1
     maxSize: 4
