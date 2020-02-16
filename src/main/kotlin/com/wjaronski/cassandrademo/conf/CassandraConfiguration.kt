@@ -5,8 +5,7 @@ import com.datastax.oss.driver.api.core.CqlIdentifier
 import com.datastax.oss.driver.api.core.CqlSession
 import com.datastax.oss.driver.api.querybuilder.SchemaBuilder.createKeyspace
 import com.datastax.oss.driver.api.querybuilder.SchemaBuilder.dropKeyspace
-import com.wjaronski.cassandrademo.repository.ReservationRepository
-import org.slf4j.LoggerFactory
+import com.wjaronski.cassandrademo.conf.logging.LoggerDelegate
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.net.InetSocketAddress
@@ -17,7 +16,7 @@ class CassandraConfiguration(
         val p: AppSettings
 ) {
 
-    private val logger = LoggerFactory.getLogger(ReservationRepository::class.java!!)
+    private val logger by LoggerDelegate()
 
     @Bean
     fun keyspace(): CqlIdentifier {

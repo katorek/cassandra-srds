@@ -19,7 +19,8 @@ data class AppSettings(
             val port: Int,
             val keyspaceName: String,
             val localDataCenterName: String,
-            val dropSchema: Boolean
+            val dropSchema: Boolean,
+            val tables: String
     )
 
     data class RoomProperties(
@@ -28,9 +29,6 @@ data class AppSettings(
     )
 
     init {
-        logger.debug("+ Properties loaded: ")
-        logger.debug("+ + Cass: {}", cass)
-        logger.debug("+ + Room: {}", room)
-        logger.debug("+ + InitData: {}", initData)
+        logger.debug("Properties loaded: {}", this)
     }
 }

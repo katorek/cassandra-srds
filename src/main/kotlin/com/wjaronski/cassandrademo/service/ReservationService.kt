@@ -1,9 +1,10 @@
 package com.wjaronski.cassandrademo.service
 
-import com.wjaronski.cassandrademo.conf.ReservationConfiguration
-import com.wjaronski.cassandrademo.model.dto.RoomAvailabilityDto
+import com.wjaronski.cassandrademo.model.dto.*
+import com.wjaronski.cassandrademo.repository.PrereservationRepository
 import com.wjaronski.cassandrademo.repository.ReservationRepository
 import com.wjaronski.cassandrademo.repository.RoomRepository
+import com.wjaronski.cassandrademo.repository.RoomReservationRepository
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -14,14 +15,54 @@ import java.util.*
 @Service
 class ReservationService(
         val roomRepository: RoomRepository,
-        val reservationRepository: ReservationRepository,
-        val reservationConfiguration: ReservationConfiguration
+        val prereservationRepo: PrereservationRepository,
+        val roomReservationRepo: RoomReservationRepository,
+        val reservationRepo: ReservationRepository
 ) {
 
+    // RoomRepository methods
 
-    fun availableRooms(dto: RoomAvailabilityDto): Optional<Set<Int>> {
+    fun insertData(data: List<RoomData>) {
+        roomRepository.insertData(data)
+    }
+
+    fun getRoomAvailability(dto: RoomAvailabilityDto): Optional<Set<Int>> {
         return roomRepository.getRoomAvailability(dto)
     }
 
-//    fun insertRoomInfo(dto:)
+    // PrereservationRepository  methods
+
+    fun incrementCounter(dto: ReservationDatesDto) {
+        prereservationRepo.incrementCounter(dto)
+    }
+
+    fun decrementCounter(dto: ReservationDatesDto) {
+        prereservationRepo.decrementCounter(dto)
+    }
+
+    fun getCounter(dto: ReservationDatesDto): Optional<Collection<Long>> {
+        return prereservationRepo.getCounter(dto)
+    }
+
+
+    // ReservationRepository methods
+
+    fun getReservationInfo(uuid: UUID): Optional<String> {
+        return reservationRepo.getReservation(uuid)
+    }
+
+    fun insertReservation(infoDto: ReservationInfoDto): UUID {
+        return reservationRepo.insertReservation(infoDto)
+    }
+
+
+    // RoomReservationRepository methods
+
+    fun getRoomsReservations(dto: ReservationDatesDto): Any {
+        return roomReservationRepo.getRoomsReservations(dto)
+    }
+
+    fun appendRoomReservation(dto: RoomReservationDto) {
+        roomReservationRepo.appendRoomReservation(dto)
+    }
 }

@@ -13,7 +13,6 @@ data class RoomData(
         private val logger by LoggerDelegate()
 
         fun fromCSV(line: String): RoomData {
-            logger.debug("{}", line)
             val tokens = line.split(";")
             val year = tokens[0].toInt()
             val month = tokens[1].toInt()
@@ -21,8 +20,7 @@ data class RoomData(
             val map = mutableMapOf<Int, Set<Int>>()
 
             for ((idx, room) in tokens.drop(2).withIndex()) {
-                logger.debug("I:{} room: {}", idx, room)
-                map.put(idx, setFromString(room))
+                map.put(idx + 1, setFromString(room))
             }
 
             return RoomData(
@@ -33,7 +31,6 @@ data class RoomData(
         }
 
         private fun setFromString(str: String): Set<Int> {
-            // [101,102,103,104,105]
             return str.removeSurrounding("[", "]")
                     .split(",")
                     .map { it.toInt() }.toSet()
