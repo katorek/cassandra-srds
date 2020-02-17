@@ -5,6 +5,7 @@ import com.datastax.oss.driver.api.core.CqlIdentifier
 import com.datastax.oss.driver.api.core.CqlSession
 import com.datastax.oss.driver.api.core.cql.*
 import com.datastax.oss.driver.api.core.type.DataTypes
+import com.datastax.oss.driver.api.querybuilder.QueryBuilder
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder.*
 import com.datastax.oss.driver.api.querybuilder.SchemaBuilder.createTable
 import com.datastax.oss.driver.api.querybuilder.relation.Relation.column
@@ -61,14 +62,7 @@ class RoomRepository(
     }
 
     private fun mapRowToSet(row: Row): Set<Int> {
-        logger.debug(row.toString())
-        logger.info(row.toString())
         return row.getSet(0, Int::class.javaObjectType) as Set<Int>
-//        val obj = row.getObject(0)
-//        return row.getObject(0) as Set<Int>
-
-//        return row.getSet(0, Integer::class.java) as Set<Int>
-
     }
 
     private fun prepareStatements() {
@@ -148,6 +142,10 @@ class RoomRepository(
             tmp.setSet(C.ROOM_WITH_X_SPACES(i), data.rooms.get(i).orEmpty(), Int::class.javaObjectType)
         }
         return tmp.build()
+    }
+
+    fun truncate() {
+        cqlSession.execute(QueryBuilder.truncate(keyspaceName, C.TABLE_ROOMS).build())
     }
 
 }

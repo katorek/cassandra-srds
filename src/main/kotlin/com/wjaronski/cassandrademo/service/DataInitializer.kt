@@ -1,15 +1,11 @@
-package com.wjaronski.cassandrademo.repository.additional
+package com.wjaronski.cassandrademo.service
 
 import com.wjaronski.cassandrademo.conf.AppSettings
 import com.wjaronski.cassandrademo.conf.logging.LoggerDelegate
-import com.wjaronski.cassandrademo.model.dto.ReservationDatesDto
 import com.wjaronski.cassandrademo.model.dto.RoomData
-import com.wjaronski.cassandrademo.repository.PrereservationRepository
-import com.wjaronski.cassandrademo.service.ReservationService
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.io.File
-import java.util.*
 
 /**
  * Created by Wojciech Jaronski
@@ -20,13 +16,10 @@ import java.util.*
 @Profile("initData")
 class DataInitializer(
         val reservationService: ReservationService,
-        val appSettings: AppSettings,
-        val prereservationRepository: PrereservationRepository
+        val appSettings: AppSettings
 ) {
     private val logger by LoggerDelegate()
 
-    private val minS = appSettings.room.minSize
-    private val maxS = appSettings.room.maxSize
     private val fileData = appSettings.initData //appSettings.initData
 
     private val data = mutableListOf<RoomData>()
@@ -34,18 +27,21 @@ class DataInitializer(
     init {
         loadData()
         insertData()
-        testPrereservation()
+//        testPrereservation()
     }
 
     private fun insertData() {
+        logger.debug("Inserting data")
         reservationService.insertData(data)
     }
 
     private fun loadData() {
+        logger.debug("Loading data")
         File(this.javaClass.classLoader.getResource(fileData).getFile())
                 .forEachLine { data.add(RoomData.fromCSV(it)) }
     }
 
+    /*
     private fun testPrereservation() {
         logger.debug("Testing counters")
         val startDate = Calendar.getInstance()
@@ -71,6 +67,7 @@ class DataInitializer(
                 endDate = endDate.time
         ))
     }
+    */
 
 }
 

@@ -5,6 +5,7 @@ import com.datastax.oss.driver.api.core.CqlIdentifier
 import com.datastax.oss.driver.api.core.CqlSession
 import com.datastax.oss.driver.api.core.cql.PreparedStatement
 import com.datastax.oss.driver.api.core.type.DataTypes
+import com.datastax.oss.driver.api.querybuilder.QueryBuilder
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder.*
 import com.datastax.oss.driver.api.querybuilder.SchemaBuilder.createTable
 import com.wjaronski.cassandrademo.conf.AppSettings
@@ -89,6 +90,10 @@ class ReservationRepository(
 
     fun removeReservationInfo(uuid: UUID) {
         cqlSession.execute(deleteReservationInfo.bind(uuid))
+    }
+
+    fun truncate() {
+        cqlSession.execute(QueryBuilder.truncate(keyspaceName, C.TABLE_RESERVATION).build())
     }
 
 }

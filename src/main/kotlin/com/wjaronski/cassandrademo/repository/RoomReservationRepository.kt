@@ -7,6 +7,7 @@ import com.datastax.oss.driver.api.core.cql.BatchType
 import com.datastax.oss.driver.api.core.cql.PreparedStatement
 import com.datastax.oss.driver.api.core.cql.Row
 import com.datastax.oss.driver.api.core.type.DataTypes
+import com.datastax.oss.driver.api.querybuilder.QueryBuilder
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder.bindMarker
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder.selectFrom
 import com.datastax.oss.driver.api.querybuilder.SchemaBuilder.createTable
@@ -169,7 +170,7 @@ class RoomReservationRepository(
         val set = setOf<com.datastax.oss.driver.api.core.data.TupleValue>(tuple)
 
         val batchStmts = BatchStatement.builder(BatchType.LOGGED)
-        while (c1.before(c2)) {
+        while (c1.before(c2) || c1.get(Calendar.DAY_OF_YEAR).equals(c2.get(Calendar.DAY_OF_YEAR))) {
             batchStmts.addStatement(baseStatement.bind(set,
                     c1.get(Calendar.YEAR),
                     c1.get(Calendar.WEEK_OF_YEAR),
@@ -178,6 +179,10 @@ class RoomReservationRepository(
         }
 
         cqlSession.execute(batchStmts.build())
+    }
+
+    fun truncate() {
+        cqlSession.execute(QueryBuilder.truncate(keyspaceName, C.TABLE_ROOM_RESERVATION).build())
     }
 
 

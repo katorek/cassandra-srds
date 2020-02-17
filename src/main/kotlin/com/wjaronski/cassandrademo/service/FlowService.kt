@@ -1,5 +1,6 @@
 package com.wjaronski.cassandrademo.service
 
+import com.wjaronski.cassandrademo.conf.AppSettings
 import com.wjaronski.cassandrademo.conf.logging.LoggerDelegate
 import com.wjaronski.cassandrademo.model.ProgressStatus
 import com.wjaronski.cassandrademo.model.dto.ReservationDatesDto
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 /**
  * Created by Wojciech Jaronski
@@ -19,7 +21,8 @@ import java.util.concurrent.TimeUnit
  */
 @Service
 class FlowService(
-        private val service: ReservationService
+        private val service: ReservationService,
+        private val appSettings: AppSettings
 ) {
     private val logger by LoggerDelegate()
 
@@ -51,6 +54,7 @@ class FlowService(
         val dayStart = c1.get(Calendar.DAY_OF_YEAR)
         val dayEnd = c2.get(Calendar.DAY_OF_YEAR)
 
+        val reservationLength = abs(dayEnd - dayStart)
 
         // stage 1
         // increment counters
@@ -77,8 +81,13 @@ class FlowService(
             return "There are no rooms available between given dates"
         }
 
+
+        val freeRoom = selectRoom(freeRooms, reservationLength)
+
+
+
         // stage 3    LETS RESERVE RANDOM FREE ROOM
-        val roomReservationDto = RoomReservationDto.randomUUID(freeRooms.random(), request)
+        val roomReservationDto = RoomReservationDto.randomUUID(freeRoom, request)
         val uuid = roomReservationDto.reservation
 
         service.appendRoomReservation(roomReservationDto)
@@ -86,8 +95,8 @@ class FlowService(
 
         sleep(300)
         val endTime = System.currentTimeMillis() - startTime
-        logger.debug("Elapsed time {} ms, {} s", TimeUnit.MILLISECONDS.toMillis(endTime), TimeUnit.MILLISECONDS.toSeconds(endTime))
-        logger.debug("Will wait 3x {} ms", endTime)
+//        logger.debug("Elapsed time {} ms, {} s", TimeUnit.MILLISECONDS.toMillis(endTime), TimeUnit.MILLISECONDS.toSeconds(endTime))
+//        logger.debug("Will wait 3x {} ms", endTime)
         takenRooms = service.getRoomsReservations(roomReservationDto.dates!!)
 
         val retries = 5
@@ -106,7 +115,7 @@ class FlowService(
                     return "There are no rooms available between given dates"
                 }
 
-                roomReservationDto.room = freeRooms.random()
+                roomReservationDto.room = selectRoom(freeRooms, reservationLength) // freeRooms.random()
                 service.appendRoomReservation(roomReservationDto)
                 service.insertReservation(ReservationInfoDto.withUUID(uuid, roomReservationDto.toString()))
             } else {
@@ -133,6 +142,19 @@ class FlowService(
             }
         }
 
+    }
+
+    private fun selectRoom(rooms: Set<Int>, cR: Int): Int {
+        val rMin = rooms.min()!!.toDouble()
+        val rMax = rooms.max()!!.toDouble()
+
+        val resMin = 1
+        val resMax = 7
+
+        val r = cR.toDouble()
+
+        val target = (r - resMin) / (resMax - resMax) * (rMax - rMin) + rMin
+        return rooms.minBy { abs(it - target) }!!.or(rooms.random())
     }
 
 
@@ -180,6 +202,15 @@ class FlowService(
             return counters.get().all { it.toInt().compareTo(numberOfRooms) <= 0 }
         }
         return false
+    }
+
+    fun truncateDataTables() {
+        logger.info("***********************")
+        logger.info("*                     *")
+        logger.info("*  Truncating Tables  *")
+        logger.info("*                     *")
+        logger.info("***********************")
+        service.truncateDataTables()
     }
 
 }
