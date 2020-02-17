@@ -27,7 +27,10 @@ appsettings:
     minSize: 1
     maxSize: 4
   initData: data.csv
-
+  stress:
+    dates:
+      start: 2020-01-01
+      end: 2020-02-01
 limits:
   room:
     min: 1
