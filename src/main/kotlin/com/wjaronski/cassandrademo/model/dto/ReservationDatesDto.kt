@@ -2,6 +2,11 @@ package com.wjaronski.cassandrademo.model.dto
 
 import java.util.*
 
+/**
+ *     roomSize
+ *     startDate
+ *     endDate
+ */
 data class ReservationDatesDto(
         val roomSize: Int,
         val startDate: Date,
@@ -31,5 +36,7 @@ data class ReservationDatesDto(
         return Pair(calendar.get(Calendar.WEEK_OF_YEAR), calendar.get(Calendar.DAY_OF_YEAR))
     }
 
-
+    override fun toString(): String {
+        return "{\"startDate\":$startDate, \"endDate\":$endDate, \"roomSize\":$roomSize}"
+    }
 }

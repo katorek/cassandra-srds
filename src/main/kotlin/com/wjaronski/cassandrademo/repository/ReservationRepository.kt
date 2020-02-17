@@ -34,6 +34,7 @@ class ReservationRepository(
 
     private lateinit var psInsertReservationInfo: PreparedStatement
     private lateinit var getReservationInfo: PreparedStatement
+    private lateinit var deleteReservationInfo: PreparedStatement
 
     init {
         createTable()
@@ -50,6 +51,11 @@ class ReservationRepository(
         getReservationInfo = cqlSession.prepare(
                 selectFrom(keyspaceName, C.TABLE_RESERVATION)
                         .column(C.DESCRIPTION)
+                        .whereColumn(C.UUID).isEqualTo(bindMarker())
+                        .build()
+        )
+        deleteReservationInfo = cqlSession.prepare(
+                deleteFrom(keyspaceName, C.TABLE_RESERVATION)
                         .whereColumn(C.UUID).isEqualTo(bindMarker())
                         .build()
         )
@@ -79,6 +85,10 @@ class ReservationRepository(
                         .withColumn(C.DESCRIPTION, DataTypes.TEXT)
                         .build())
         logger.debug("\tTable '{}' has been created (if needed)", C.TABLE_RESERVATION.asInternal())
+    }
+
+    fun removeReservationInfo(uuid: UUID) {
+        cqlSession.execute(deleteReservationInfo.bind(uuid))
     }
 
 }

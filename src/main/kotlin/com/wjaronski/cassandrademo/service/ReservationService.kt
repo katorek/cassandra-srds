@@ -14,10 +14,10 @@ import java.util.*
  */
 @Service
 class ReservationService(
-        val roomRepository: RoomRepository,
-        val prereservationRepo: PrereservationRepository,
-        val roomReservationRepo: RoomReservationRepository,
-        val reservationRepo: ReservationRepository
+        private val roomRepository: RoomRepository,
+        private val prereservationRepo: PrereservationRepository,
+        private val roomReservationRepo: RoomReservationRepository,
+        private val reservationRepo: ReservationRepository
 ) {
 
     // RoomRepository methods
@@ -26,6 +26,12 @@ class ReservationService(
         roomRepository.insertData(data)
     }
 
+    /**
+     *     returns list of rooms avaialble to reserve
+     *
+     *     example [101, 102, 103]
+     *     example null
+     */
     fun getRoomAvailability(dto: RoomAvailabilityDto): Optional<Set<Int>> {
         return roomRepository.getRoomAvailability(dto)
     }
@@ -58,11 +64,19 @@ class ReservationService(
 
     // RoomReservationRepository methods
 
-    fun getRoomsReservations(dto: ReservationDatesDto): Any {
+    fun getRoomsReservations(dto: ReservationDatesDto): List<Optional<List<RoomReservationDto>>> {
         return roomReservationRepo.getRoomsReservations(dto)
     }
 
     fun appendRoomReservation(dto: RoomReservationDto) {
         roomReservationRepo.appendRoomReservation(dto)
+    }
+
+    fun removeRoomReservation(dto: RoomReservationDto) {
+        roomReservationRepo.removeRoomReservation(dto)
+    }
+
+    fun removeReservationInfo(uuid: UUID) {
+        reservationRepo.removeReservationInfo(uuid)
     }
 }

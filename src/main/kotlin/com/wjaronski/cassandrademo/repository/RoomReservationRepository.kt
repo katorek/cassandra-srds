@@ -2,7 +2,10 @@ package com.wjaronski.cassandrademo.repository
 
 import com.datastax.oss.driver.api.core.CqlIdentifier
 import com.datastax.oss.driver.api.core.CqlSession
-import com.datastax.oss.driver.api.core.cql.*
+import com.datastax.oss.driver.api.core.cql.BatchStatement
+import com.datastax.oss.driver.api.core.cql.BatchType
+import com.datastax.oss.driver.api.core.cql.PreparedStatement
+import com.datastax.oss.driver.api.core.cql.Row
 import com.datastax.oss.driver.api.core.type.DataTypes
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder.bindMarker
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder.selectFrom
@@ -46,6 +49,8 @@ class RoomReservationRepository(
      *    and day = ?
      */
     val appendSetItemByRoomSize = mutableMapOf<Int, PreparedStatement>()
+    val removeSetItemByRoomSize = mutableMapOf<Int, PreparedStatement>()
+    private val tupleType = DefaultTupleType(mutableListOf(DataTypes.INT, DataTypes.UUID))
 
     init {
         createTable()
@@ -73,12 +78,17 @@ class RoomReservationRepository(
 //                    .whereColumn(C.WEEK).isEqualTo(bindMarker())
 //                    .whereColumn(C.DAY).isEqualTo(bindMarker())
 //                    .build())
-
-            val s = "update ${C.TABLE_ROOM_RESERVATION} set ${C.ROOM_WITH_X_SPACES(i)} = ${C.ROOM_WITH_X_SPACES(i)} + ? " +
+            val remove = "update ${C.TABLE_ROOM_RESERVATION} set ${C.ROOM_WITH_X_SPACES(i)} = ${C.ROOM_WITH_X_SPACES(i)} - ? " +
                     "where ${C.YEAR} = ? and " +
                     "${C.WEEK} = ? and " +
                     "${C.DAY} = ? ;"
-            appendSetItemByRoomSize.put(i, cqlSession.prepare(s))
+
+            val append = "update ${C.TABLE_ROOM_RESERVATION} set ${C.ROOM_WITH_X_SPACES(i)} = ${C.ROOM_WITH_X_SPACES(i)} + ? " +
+                    "where ${C.YEAR} = ? and " +
+                    "${C.WEEK} = ? and " +
+                    "${C.DAY} = ? ;"
+            appendSetItemByRoomSize.put(i, cqlSession.prepare(append))
+            removeSetItemByRoomSize.put(i, cqlSession.prepare(remove))
 
         }
     }
@@ -135,6 +145,16 @@ class RoomReservationRepository(
     }
 
     fun appendRoomReservation(dto: RoomReservationDto) {
+        val statement = appendSetItemByRoomSize.getValue(dto.dates!!.roomSize)
+        modifyRoomReservation(dto, statement)
+    }
+
+    fun removeRoomReservation(dto: RoomReservationDto) {
+        val statement = removeSetItemByRoomSize.getValue(dto.dates!!.roomSize)
+        modifyRoomReservation(dto, statement)
+    }
+
+    private fun modifyRoomReservation(dto: RoomReservationDto, baseStatement: PreparedStatement) {
         val dates = dto.dates!!
         val tuple = DataTypes.tupleOf(DataTypes.INT, DataTypes.UUID).newValue(dto.room, dto.reservation)
 
@@ -145,14 +165,7 @@ class RoomReservationRepository(
         c1.time = dto.dates!!.startDate
         c2.time = dto.dates!!.endDate
 
-        val stmts = arrayListOf<BoundStatement>()
-        val stmts2 = arrayListOf<BoundStatement>()
-
-        val baseStatement = appendSetItemByRoomSize.getValue(dates.roomSize)
-
-        val tupleType = DefaultTupleType(mutableListOf(DataTypes.INT, DataTypes.UUID))
         val tupleValue = tupleType.newValue()
-//        com.datastax.oss.driver.api.core.data.TupleValue
         val set = setOf<com.datastax.oss.driver.api.core.data.TupleValue>(tuple)
 
         val batchStmts = BatchStatement.builder(BatchType.LOGGED)
@@ -166,4 +179,6 @@ class RoomReservationRepository(
 
         cqlSession.execute(batchStmts.build())
     }
+
+
 }

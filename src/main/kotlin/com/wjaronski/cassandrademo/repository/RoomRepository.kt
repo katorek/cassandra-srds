@@ -87,8 +87,10 @@ class RoomRepository(
 
             val psI = selectFrom(keyspaceName, C.TABLE_ROOMS)
                     .column(C.ROOM_WITH_X_SPACES(i))
-                    .where(column(C.YEAR).isEqualTo(bindMarker(C.YEAR)),
-                            column(C.MONTH).isEqualTo(bindMarker(C.MONTH)))
+                    .where(
+                            column(C.YEAR).isEqualTo(bindMarker(C.YEAR)),
+                            column(C.MONTH).isEqualTo(bindMarker(C.MONTH))
+                    )
                     .build()
             psRoomsByYearAndMonth.put(i, cqlSession.prepare(psI))
 
