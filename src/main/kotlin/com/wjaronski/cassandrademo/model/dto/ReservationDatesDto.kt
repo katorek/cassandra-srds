@@ -18,6 +18,8 @@ data class ReservationDatesDto(
         return COMPARATOR.compare(this, other)
     }
 
+    val uuid = UUID.randomUUID()
+
     var year: Int? = 0
     var result: ProgressStatus = ProgressStatus.INIT
 
@@ -25,9 +27,9 @@ data class ReservationDatesDto(
         val calendar = Calendar.getInstance()
         private val COMPARATOR =
                 Comparator.comparingInt<ReservationDatesDto> { it.roomSize }
+                        .thenComparing { o1: ReservationDatesDto?, o2: ReservationDatesDto? -> o1!!.uuid.compareTo(o2!!.uuid) }
                         .thenComparing { o1: ReservationDatesDto?, o2: ReservationDatesDto? -> o1!!.startDate.compareTo(o2!!.startDate) }
                         .thenComparing { o1: ReservationDatesDto?, o2: ReservationDatesDto? -> o1!!.endDate.compareTo(o2!!.endDate) }
-                        .thenComparingInt { it.days!! }
     }
 
     /**
