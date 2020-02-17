@@ -86,7 +86,7 @@ class StressTestService(
 
         logger.info("---------- SUMMARY STATISTICS ----------".also { sb.append(it).append("\n") })
         logger.info("".also { sb.append(it).append("\n") })
-        logger.info("Execution time: ${time}ms | ${TimeUnit.MILLISECONDS.toSeconds(time)}s | ${TimeUnit.MILLISECONDS.toMinutes(time)}".also { sb.append(it).append("\n") })
+        logger.info("Execution time: ${time}ms | ${TimeUnit.MILLISECONDS.toSeconds(time)}s | ${TimeUnit.MILLISECONDS.toMinutes(time)}min".also { sb.append(it).append("\n") })
         logger.info("".also { sb.append(it).append("\n") })
         logger.info("Runned: ${stats.size}\t${overallStatus.map { (k2, v2) -> "$k2[$v2]" }.joinToString("\t", "\t")}".also { sb.append(it).append("\n") })
         logger.info("".also { sb.append(it).append("\n") })
