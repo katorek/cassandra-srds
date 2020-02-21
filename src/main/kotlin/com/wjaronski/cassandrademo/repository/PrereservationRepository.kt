@@ -6,6 +6,7 @@ import com.datastax.oss.driver.api.core.cql.*
 import com.datastax.oss.driver.api.core.type.DataTypes
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder.bindMarker
+import com.datastax.oss.driver.api.querybuilder.QueryBuilder.truncate
 import com.datastax.oss.driver.api.querybuilder.SchemaBuilder.createTable
 import com.datastax.oss.driver.api.querybuilder.relation.Relation.column
 import com.wjaronski.cassandrademo.conf.AppSettings
@@ -57,6 +58,10 @@ class PrereservationRepository(
         prepareStatements()
     }
 
+    fun truncate() {
+        cqlSession.execute(truncate(keyspaceName, C.TABLE_PRERESERVATION).build())
+    }
+
     private fun createTable() {
         prepare(C.TABLE_PRERESERVATION)
 
@@ -70,7 +75,7 @@ class PrereservationRepository(
             baseTable = baseTable.withColumn(C.ROOM_WITH_X_SPACES(i), DataTypes.COUNTER)
 
         cqlSession.execute(baseTable.build())
-        logger.debug("+ Table '{}' has been created (if needed)", C.TABLE_PRERESERVATION.asInternal())
+        logger.debug("\tTable '{}' has been created (if needed)", C.TABLE_PRERESERVATION.asInternal())
     }
 
     private fun prepareStatements() {
@@ -144,7 +149,7 @@ class PrereservationRepository(
         c1.time = dto.startDate
         c2.time = dto.endDate
 
-        while (c1.before(c2)) {
+        while (c1.before(c2) || c1.get(Calendar.DAY_OF_YEAR).equals(c2.get(Calendar.DAY_OF_YEAR))) {
             val t = statement.boundStatementBuilder()
             stmts.add(
                     t.setInt(0, c1.get(Calendar.YEAR))

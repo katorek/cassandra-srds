@@ -1,16 +1,35 @@
 package com.wjaronski.cassandrademo.model.dto
 
+import com.wjaronski.cassandrademo.model.ProgressStatus
 import java.util.*
 
+/**
+ *     roomSize
+ *     startDate
+ *     endDate
+ */
 data class ReservationDatesDto(
         val roomSize: Int,
         val startDate: Date,
-        val endDate: Date
-) {
+        val endDate: Date,
+        var days: Int? = null
+) : Comparable<ReservationDatesDto> {
+    override fun compareTo(other: ReservationDatesDto): Int {
+        return COMPARATOR.compare(this, other)
+    }
+
+    val uuid = UUID.randomUUID()
+
     var year: Int? = 0
+    var result: ProgressStatus = ProgressStatus.INIT
 
     companion object {
         val calendar = Calendar.getInstance()
+        private val COMPARATOR =
+                Comparator.comparingInt<ReservationDatesDto> { it.roomSize }
+                        .thenComparing { o1: ReservationDatesDto?, o2: ReservationDatesDto? -> o1!!.uuid.compareTo(o2!!.uuid) }
+                        .thenComparing { o1: ReservationDatesDto?, o2: ReservationDatesDto? -> o1!!.startDate.compareTo(o2!!.startDate) }
+                        .thenComparing { o1: ReservationDatesDto?, o2: ReservationDatesDto? -> o1!!.endDate.compareTo(o2!!.endDate) }
     }
 
     /**
@@ -31,5 +50,7 @@ data class ReservationDatesDto(
         return Pair(calendar.get(Calendar.WEEK_OF_YEAR), calendar.get(Calendar.DAY_OF_YEAR))
     }
 
-
+    override fun toString(): String {
+        return "{\"startDate\":$startDate, \"endDate\":$endDate, \"roomSize\":$roomSize}"
+    }
 }

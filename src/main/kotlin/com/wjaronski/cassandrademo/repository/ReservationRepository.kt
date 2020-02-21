@@ -5,6 +5,7 @@ import com.datastax.oss.driver.api.core.CqlIdentifier
 import com.datastax.oss.driver.api.core.CqlSession
 import com.datastax.oss.driver.api.core.cql.PreparedStatement
 import com.datastax.oss.driver.api.core.type.DataTypes
+import com.datastax.oss.driver.api.querybuilder.QueryBuilder
 import com.datastax.oss.driver.api.querybuilder.QueryBuilder.*
 import com.datastax.oss.driver.api.querybuilder.SchemaBuilder.createTable
 import com.wjaronski.cassandrademo.conf.AppSettings
@@ -34,6 +35,7 @@ class ReservationRepository(
 
     private lateinit var psInsertReservationInfo: PreparedStatement
     private lateinit var getReservationInfo: PreparedStatement
+    private lateinit var deleteReservationInfo: PreparedStatement
 
     init {
         createTable()
@@ -50,6 +52,11 @@ class ReservationRepository(
         getReservationInfo = cqlSession.prepare(
                 selectFrom(keyspaceName, C.TABLE_RESERVATION)
                         .column(C.DESCRIPTION)
+                        .whereColumn(C.UUID).isEqualTo(bindMarker())
+                        .build()
+        )
+        deleteReservationInfo = cqlSession.prepare(
+                deleteFrom(keyspaceName, C.TABLE_RESERVATION)
                         .whereColumn(C.UUID).isEqualTo(bindMarker())
                         .build()
         )
@@ -79,6 +86,14 @@ class ReservationRepository(
                         .withColumn(C.DESCRIPTION, DataTypes.TEXT)
                         .build())
         logger.debug("\tTable '{}' has been created (if needed)", C.TABLE_RESERVATION.asInternal())
+    }
+
+    fun removeReservationInfo(uuid: UUID) {
+        cqlSession.execute(deleteReservationInfo.bind(uuid))
+    }
+
+    fun truncate() {
+        cqlSession.execute(QueryBuilder.truncate(keyspaceName, C.TABLE_RESERVATION).build())
     }
 
 }
